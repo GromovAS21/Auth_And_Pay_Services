@@ -12,7 +12,7 @@ class Transaction(Base):
     id = mapped_column(Integer, primary_key=True, index=True)
     transaction_id = mapped_column(String, unique=True, index=True)
     account_id = mapped_column(Integer, ForeignKey('accounts.id'))
-    users_id = mapped_column(Integer, ForeignKey('users.id'))
+    user_id = mapped_column(Integer, ForeignKey('users.id'))
     amount = mapped_column(Float)
     signature = mapped_column(String)
 

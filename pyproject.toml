@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "auth-and-pay-services"
+version = "0.1.0"
+description = ""
+authors = ["Anton Gromov <seed14112@yaandex.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+sqlalchemy = "^2.0.40"
+dotenv = "^0.9.9"
+fastapi = "^0.115.12"
+pydantic = "^2.11.4"
+uvicorn = "^0.34.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

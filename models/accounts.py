@@ -14,3 +14,4 @@ class Account(Base):
     user_id = mapped_column(Integer, ForeignKey("users.id"))
 
     user = relationship("User", back_populates="account")
+    transaction = relationship("Transaction", back_populates="account")

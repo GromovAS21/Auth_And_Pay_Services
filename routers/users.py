@@ -23,7 +23,7 @@ async def create_user(
         get_user: Annotated[dict, Depends(get_current_user)],
         user: CreateUser
 ):
-    """Создание пользователя."""
+    """Создание пользователя и счета для данного пользователя."""
     if not get_user["is_admin"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -37,6 +37,8 @@ async def create_user(
         last_name=user.last_name,
         hashed_password=bcrypt_context.hash(user.password)
     ))
+    new_user = await db.scalar(select(User).where(User.email == user.email))
+    await db.execute(insert(Account).values(user_id=new_user.id))
     await db.commit()
     return {"status_code": status.HTTP_201_CREATED, "transaction": "Successful"}
 

@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends
-from sqlalchemy import select, insert, update
+from sqlalchemy import select, insert, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
@@ -67,6 +67,7 @@ async def update_user(
     await db.commit()
     return {"status_code": status.HTTP_200_OK, "transaction": "User update is successful"}
 
+
 @router.get("/{user_id}")
 async def retrieve_user(
         db: Annotated[AsyncSession, Depends(get_db)],
@@ -84,6 +85,36 @@ async def retrieve_user(
         "id": user.id,
         "email": user.email,
         "full_name": f"{user.first_name} {user.last_name}"
+    }
+
+
+@router.delete("/{user_id}")
+async def delete_user(
+        db: Annotated[AsyncSession, Depends(get_db)],
+        user_id: int,
+        get_user: Annotated[dict, Depends(get_current_user)]
+):
+    if not get_user["is_admin"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission",
+        )
+    user = await db.scalar(select(User).where(User.id == user_id, User.is_active == True))
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    if user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can't delete admin"
+        )
+    user.is_active = False
+    await db.commit()
+    return {
+        "status_code": status.HTTP_200_OK,
+        "transaction": "User delete is successful"
     }
 
 

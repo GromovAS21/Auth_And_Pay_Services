@@ -33,7 +33,7 @@ async def authenticate_user(
     user = await db.scalar(select(User).where(User.username == username))
     if (
             not user
-            or not bcrypt_context.verify(password, user.hashed_password)
+            or not bcrypt_context.verify(password, user.password)
             or user.is_active == False
     ):
         raise HTTPException(

@@ -14,7 +14,7 @@ class User(Base):
     username = mapped_column(String, nullable=False)
     first_name = mapped_column(String, nullable=False)
     last_name = mapped_column(String, nullable=False)
-    hashed_password = mapped_column(String, nullable=False)
+    password = mapped_column(String)
     is_active = mapped_column(Boolean, default=True)
     is_admin = mapped_column(Boolean, default=False)
 

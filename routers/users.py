@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends
-from sqlalchemy import select, insert
+from sqlalchemy import select, insert, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
@@ -12,7 +12,7 @@ from models.transactions import Transaction
 from models.users import User
 from routers.auth import get_current_user, bcrypt_context
 
-from schemas import CreateUser
+from schemas import CreateUser, UpdateUser
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -35,7 +35,7 @@ async def create_user(
         username=user.username,
         first_name=user.first_name,
         last_name=user.last_name,
-        hashed_password=bcrypt_context.hash(user.password)
+        password=bcrypt_context.hash(user.password)
     ))
     new_user = await db.scalar(select(User).where(User.email == user.email))
     await db.execute(insert(Account).values(user_id=new_user.id))
@@ -43,8 +43,32 @@ async def create_user(
     return {"status_code": status.HTTP_201_CREATED, "transaction": "Successful"}
 
 
+@router.put("/{user_id}")
+async def update_user(
+        db: Annotated[AsyncSession, Depends(get_db)],
+        get_user: Annotated[dict, Depends(get_current_user)],
+        user_id: int,
+        update_data: UpdateUser
+):
+    """Обновление данных пользователя."""
+    if not get_user["is_admin"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission",
+        )
+    user = await db.scalar(select(User).where(User.id == user_id))
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    await db.execute(update(User).where(User.id == user_id).values(
+        **update_data.model_dump()))
+    await db.commit()
+    return {"status_code": status.HTTP_200_OK, "transaction": "User update is successful"}
+
 @router.get("/{user_id}")
-async def get_user_data(
+async def retrieve_user(
         db: Annotated[AsyncSession, Depends(get_db)],
         user_id: int,
         get_user: Annotated[dict, Depends(get_current_user)]
@@ -103,4 +127,3 @@ async def get_transactions_user(
         )
     transactions = await db.scalars(select(Transaction).where(Transaction.user_id == user_id))
     return transactions.all()
-

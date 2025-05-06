@@ -11,7 +11,7 @@ class User(Base):
 
     id = mapped_column(Integer, primary_key=True, index=True)
     email = mapped_column(String, nullable=False, unique=True)
-    username = mapped_column(String, nullable=False)
+    username = mapped_column(String, nullable=False, unique=True)
     first_name = mapped_column(String, nullable=False)
     last_name = mapped_column(String, nullable=False)
     password = mapped_column(String)

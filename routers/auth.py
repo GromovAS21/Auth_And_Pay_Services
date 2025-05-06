@@ -32,9 +32,9 @@ async def authenticate_user(
     """Аутентификация пользователя."""
     user = await db.scalar(select(User).where(User.username == username))
     if (
-            not user
-            or not bcrypt_context.verify(password, user.password)
-            or user.is_active == False
+        not user
+        or not bcrypt_context.verify(password, user.password)
+        or user.is_active == False
     ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -111,10 +111,10 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 
 @router.post("/token")
 async def login(
-    db: Annotated[AsyncSession, Depends(get_db)],
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+        db: Annotated[AsyncSession, Depends(get_db)],
+        form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ):
-    """Авторизация пользователя"""
+    """Авторизация пользователя."""
     user = await authenticate_user(db, form_data.username, form_data.password)
     token = await create_access_token(
         user.id,

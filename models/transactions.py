@@ -14,7 +14,6 @@ class Transaction(Base):
     account_id = mapped_column(Integer, ForeignKey('accounts.id'))
     user_id = mapped_column(Integer, ForeignKey('users.id'))
     amount = mapped_column(Float)
-    signature = mapped_column(String)
 
     account = relationship('Account', back_populates='transaction')
     user = relationship('User', back_populates='transaction')

@@ -40,3 +40,12 @@ class UsersWithAccounts(BaseModel):
     email: EmailStr = Field(..., description="Email пользователя")
     full_name: str = Field(..., description="ФИО пользователя")
     accounts: List[AccountSchema] = Field(..., description="Список аккаунтов пользователя")
+
+
+class WebhookRequestSchema(BaseModel):
+    """Схема для работы с вебхуком."""
+    transaction_id: str = Field(..., min_length=36, max_length=36, description="ID транзакции")
+    account_id: int = Field(..., description="ID счета пользователя")
+    user_id: int = Field(..., description="ID пользователя", exclude=True)
+    amount: float = Field(..., description="Сумма транзакции")
+    signature: str = Field(..., description="Подпись транзакции")

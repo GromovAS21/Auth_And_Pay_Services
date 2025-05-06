@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from routers import auth, users
+from routers import auth, users, transactions
 
 app = FastAPI(
     title="Auth_and_Pay_services",
@@ -12,3 +12,4 @@ app = FastAPI(
 
 app.include_router(auth.router)
 app.include_router(users.router)
+app.include_router(transactions.router)

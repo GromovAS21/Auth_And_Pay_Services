@@ -3,7 +3,7 @@ from typing import List
 from pydantic import BaseModel, EmailStr, Field
 
 
-class CreateUser(BaseModel):
+class CreateUserSchema(BaseModel):
     """Схема для создания пользователя."""
 
     email: EmailStr = Field(..., description="Email пользователя")
@@ -13,7 +13,7 @@ class CreateUser(BaseModel):
     password: str = Field(..., min_length=8, description="Пароль")
 
 
-class UpdateUser(CreateUser):
+class UpdateUserSchema(CreateUserSchema):
     """Схема для обновления пользователя."""
 
     password: None = Field(None, exclude=True)
@@ -21,14 +21,14 @@ class UpdateUser(CreateUser):
     is_admin: bool = Field(default=False, description="Админ статус пользователя")
 
 
-class User(BaseModel):
+class UserSchema(BaseModel):
     """Схема для получения пользователя."""
 
     id: int = Field(..., description="ID пользователя")
     email: EmailStr = Field(..., description="Email пользователя")
     full_name: str = Field(..., description="ФИО пользователя")
 
-class Account(BaseModel):
+class AccountSchema(BaseModel):
     """Схема для получения аккаунта пользователя."""
     id: int = Field(..., description="ID аккаунта")
     total: float = Field(..., description="Баланс пользователя")
@@ -39,4 +39,4 @@ class UsersWithAccounts(BaseModel):
     id: int = Field(..., description="ID пользователя")
     email: EmailStr = Field(..., description="Email пользователя")
     full_name: str = Field(..., description="ФИО пользователя")
-    accounts: List[Account] = Field(..., description="Список аккаунтов пользователя")
+    accounts: List[AccountSchema] = Field(..., description="Список аккаунтов пользователя")

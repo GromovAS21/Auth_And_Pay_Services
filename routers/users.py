@@ -13,7 +13,7 @@ from models.transactions import Transaction
 from models.users import User
 from routers.auth import get_current_user, bcrypt_context
 
-from schemas import CreateUser, UpdateUser, UsersWithAccounts
+from schemas import CreateUserSchema, UpdateUserSchema, UsersWithAccounts, AccountSchema
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -22,7 +22,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 async def create_user(
         db: Annotated[AsyncSession, Depends(get_db)],
         get_user: Annotated[dict, Depends(get_current_user)],
-        user: CreateUser
+        user: CreateUserSchema
 ):
     """Создание пользователя и счета для данного пользователя."""
     if not get_user["is_admin"]:
@@ -41,7 +41,7 @@ async def create_user(
     except sqlalchemy.exc.IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User already registered",
+            detail="UserSchema already registered",
         )
     new_user = await db.scalar(select(User).where(User.email == user.email))
     await db.execute(insert(Account).values(user_id=new_user.id))
@@ -79,7 +79,7 @@ async def update_user(
         db: Annotated[AsyncSession, Depends(get_db)],
         get_user: Annotated[dict, Depends(get_current_user)],
         user_id: int,
-        update_data: UpdateUser
+        update_data: UpdateUserSchema
 ):
     """Обновление данных пользователя."""
     if not get_user["is_admin"]:
@@ -91,12 +91,12 @@ async def update_user(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
+            detail="UserSchema not found",
         )
     await db.execute(update(User).where(User.id == user_id).values(
         **update_data.model_dump()))
     await db.commit()
-    return {"status_code": status.HTTP_200_OK, "transaction": "User update is successful"}
+    return {"status_code": status.HTTP_200_OK, "transaction": "UserSchema update is successful"}
 
 
 @router.get("/{user_id}")
@@ -135,7 +135,7 @@ async def delete_user(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
+            detail="UserSchema not found",
         )
     if user.is_admin:
         raise HTTPException(
@@ -146,11 +146,11 @@ async def delete_user(
     await db.commit()
     return {
         "status_code": status.HTTP_200_OK,
-        "transaction": "User delete is successful"
+        "transaction": "UserSchema delete is successful"
     }
 
 
-@router.get("/{user_id}/accounts")
+@router.get("/{user_id}/accounts", response_model=List[AccountSchema])
 async def get_accounts_user(
         db: Annotated[AsyncSession, Depends(get_db)],
         user_id: int,

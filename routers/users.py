@@ -43,6 +43,31 @@ async def create_user(
     return {"status_code": status.HTTP_201_CREATED, "transaction": "Successful"}
 
 
+@router.get("/users-with-accounts")
+async def get_users_with_accounts(
+        db: Annotated[AsyncSession, Depends(get_db)],
+        get_user: Annotated[dict, Depends(get_current_user)]
+):
+    """Получение списка пользователей и списка его счетов с балансами."""
+    if not get_user["is_admin"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission",
+        )
+    users = await db.scalars(select(User).where(User.is_active == True))
+    users_list = []
+    for user in users:
+        accounts = await db.scalars(select(Account).where(Account.user_id == user.id))
+        user_dict = {
+            "id": user.id,
+            "email": user.email,
+            "full_name": f"{user.first_name} {user.last_name}",
+            "accounts": [{"id": account.id, "total": account.total} for account in accounts]
+        }
+        users_list.append(user_dict)
+    return users_list
+
+
 @router.put("/{user_id}")
 async def update_user(
         db: Annotated[AsyncSession, Depends(get_db)],
@@ -94,6 +119,7 @@ async def delete_user(
         user_id: int,
         get_user: Annotated[dict, Depends(get_current_user)]
 ):
+    """Удаление пользователя. Перевод поля is_active в False."""
     if not get_user["is_admin"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

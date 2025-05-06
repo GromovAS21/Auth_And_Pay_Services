@@ -1,8 +1,9 @@
-from typing import Annotated
+from typing import Annotated, List
 
+import sqlalchemy
 from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends
-from sqlalchemy import select, insert, update, delete
+from sqlalchemy import select, insert, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
@@ -12,7 +13,7 @@ from models.transactions import Transaction
 from models.users import User
 from routers.auth import get_current_user, bcrypt_context
 
-from schemas import CreateUser, UpdateUser
+from schemas import CreateUser, UpdateUser, UsersWithAccounts
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -29,21 +30,26 @@ async def create_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission",
         )
-
-    await db.execute(insert(User).values(
-        email=user.email,
-        username=user.username,
-        first_name=user.first_name,
-        last_name=user.last_name,
-        password=bcrypt_context.hash(user.password)
-    ))
+    try:
+        await db.execute(insert(User).values(
+            email=user.email,
+            username=user.username,
+            first_name=user.first_name,
+            last_name=user.last_name,
+            password=bcrypt_context.hash(user.password)
+        ))
+    except sqlalchemy.exc.IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered",
+        )
     new_user = await db.scalar(select(User).where(User.email == user.email))
     await db.execute(insert(Account).values(user_id=new_user.id))
     await db.commit()
     return {"status_code": status.HTTP_201_CREATED, "transaction": "Successful"}
 
 
-@router.get("/users-with-accounts")
+@router.get("/users-with-accounts", response_model=List[UsersWithAccounts])
 async def get_users_with_accounts(
         db: Annotated[AsyncSession, Depends(get_db)],
         get_user: Annotated[dict, Depends(get_current_user)]

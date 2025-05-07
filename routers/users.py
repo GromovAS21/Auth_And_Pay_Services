@@ -13,7 +13,7 @@ from models.transactions import Transaction
 from models.users import User
 from routers.auth import get_current_user, bcrypt_context
 
-from schemas import CreateUserSchema, UpdateUserSchema, UsersWithAccounts, AccountSchema
+from schemas import CreateUserSchema, UpdateUserSchema, UsersWithAccounts, AccountSchema, TransactionSchema
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -96,7 +96,10 @@ async def update_user(
     await db.execute(update(User).where(User.id == user_id).values(
         **update_data.model_dump()))
     await db.commit()
-    return {"status_code": status.HTTP_200_OK, "transaction": "UserSchema update is successful"}
+    return {
+        "status_code": status.HTTP_200_OK,
+        "transaction": "UserSchema update is successful"
+    }
 
 
 @router.get("/{user_id}")
@@ -171,7 +174,7 @@ async def get_accounts_user(
     return accounts.all()
 
 
-@router.get("/{user_id}/transactions")
+@router.get("/{user_id}/transactions", response_model=List[TransactionSchema])
 async def get_transactions_user(
         db: Annotated[AsyncSession, Depends(get_db)],
         user_id: int,

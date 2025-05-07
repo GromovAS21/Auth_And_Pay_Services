@@ -29,9 +29,15 @@ class UserSchema(BaseModel):
     full_name: str = Field(..., description="ФИО пользователя")
 
 class AccountSchema(BaseModel):
-    """Схема для получения аккаунта пользователя."""
+    """Схема для получения счетов пользователя."""
     id: int = Field(..., description="ID аккаунта")
     total: float = Field(..., description="Баланс пользователя")
+
+class TransactionSchema(BaseModel):
+    """Схема для получения транзакции пользователя."""
+    id: int = Field(..., description="ID транзакции")
+    transaction_id: str = Field(..., description="Уникальный идентификатор транзакции в стороннем сервисе")
+    amount: float = Field(..., description="Сумма транзакции")
 
 
 class UsersWithAccounts(BaseModel):

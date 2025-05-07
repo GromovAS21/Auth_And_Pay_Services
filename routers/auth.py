@@ -1,11 +1,10 @@
-from datetime import timedelta, timezone, datetime
+from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
 import jwt
-
 from fastapi import APIRouter, HTTPException, status
 from fastapi.params import Depends
-from fastapi.security import HTTPBasic, OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from fastapi.security import HTTPBasic, OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,6 +13,7 @@ import config
 from database.db_depends import get_db
 from models.users import User
 
+
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -21,18 +21,10 @@ security = HTTPBasic()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
-async def authenticate_user(
-        db: Annotated[AsyncSession, Depends(get_db)],
-        username: str,
-        password: str
-):
+async def authenticate_user(db: Annotated[AsyncSession, Depends(get_db)], username: str, password: str):
     """Аутентификация пользователя."""
     user = await db.scalar(select(User).where(User.username == username))
-    if (
-        not user
-        or not bcrypt_context.verify(password, user.password)
-        or user.is_active == False
-    ):
+    if not user or not bcrypt_context.verify(password, user.password) or not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
@@ -42,10 +34,10 @@ async def authenticate_user(
 
 
 async def create_access_token(
-        user_id: int,
-        username: str,
-        is_admin: bool,
-        expires_delta: timedelta,
+    user_id: int,
+    username: str,
+    is_admin: bool,
+    expires_delta: timedelta,
 ):
     """Создание токена."""
     payload = {
@@ -79,16 +71,12 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
             )
 
         if not isinstance(expire, int):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token format"
-            )
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token format")
 
         current_time = datetime.now(timezone.utc).timestamp()
 
         if expire < current_time:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired!"
-            )
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired!")
 
         return {
             "username": username,
@@ -97,19 +85,15 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         }
 
     except jwt.ExpiredSignatureError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired!"
-        )
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired!")
     except jwt.exceptions:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate user"
-        )
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate user")
 
 
 @router.post("/token")
 async def login(
-        db: Annotated[AsyncSession, Depends(get_db)],
-        form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    db: Annotated[AsyncSession, Depends(get_db)],
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ):
     """Авторизация пользователя."""
     user = await authenticate_user(db, form_data.username, form_data.password)

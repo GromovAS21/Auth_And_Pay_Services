@@ -7,11 +7,12 @@ Create Date: 2025-05-06 18:21:12.954196
 """
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
-from sqlalchemy import table, column
+from alembic import op
+from sqlalchemy import column, table
 
 from routers.auth import bcrypt_context
+
 
 # revision identifiers, used by Alembic.
 revision: str = 'c297fbf78624'
@@ -85,6 +86,10 @@ def upgrade() -> None:
     )
 
     op.bulk_insert(accounts_table, [
+        {
+            'total': 0,
+            'user_id': 1
+        },
         {
             'total': 0,
             'user_id': 2

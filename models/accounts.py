@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, Float, ForeignKey
+from sqlalchemy import Float, ForeignKey, Integer
 from sqlalchemy.orm import mapped_column, relationship
 
 from database.db import Base
@@ -7,7 +7,7 @@ from database.db import Base
 class Account(Base):
     """Таблица для счета"""
 
-    __tablename__ = 'accounts'
+    __tablename__ = "accounts"
 
     id = mapped_column(Integer, primary_key=True, index=True)
     total = mapped_column(Float, default=0)

@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String, Boolean
+from sqlalchemy import Boolean, Integer, String
 from sqlalchemy.orm import mapped_column, relationship
 
 from database.db import Base
@@ -20,4 +20,3 @@ class User(Base):
 
     account = relationship("Account", back_populates="user")
     transaction = relationship("Transaction", back_populates="user")
-

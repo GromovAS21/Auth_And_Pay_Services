@@ -28,13 +28,17 @@ class UserSchema(BaseModel):
     email: EmailStr = Field(..., description="Email пользователя")
     full_name: str = Field(..., description="ФИО пользователя")
 
+
 class AccountSchema(BaseModel):
     """Схема для получения счетов пользователя."""
+
     id: int = Field(..., description="ID аккаунта")
     total: float = Field(..., description="Баланс пользователя")
 
+
 class TransactionSchema(BaseModel):
     """Схема для получения транзакции пользователя."""
+
     id: int = Field(..., description="ID транзакции")
     transaction_id: str = Field(..., description="Уникальный идентификатор транзакции в стороннем сервисе")
     amount: float = Field(..., description="Сумма транзакции")
@@ -42,6 +46,7 @@ class TransactionSchema(BaseModel):
 
 class UsersWithAccounts(BaseModel):
     """Схема для получения пользователей с аккаунтами."""
+
     id: int = Field(..., description="ID пользователя")
     email: EmailStr = Field(..., description="Email пользователя")
     full_name: str = Field(..., description="ФИО пользователя")
@@ -50,6 +55,7 @@ class UsersWithAccounts(BaseModel):
 
 class WebhookRequestSchema(BaseModel):
     """Схема для работы с вебхуком."""
+
     transaction_id: str = Field(..., min_length=36, max_length=36, description="ID транзакции")
     account_id: int = Field(..., description="ID счета пользователя")
     user_id: int = Field(..., description="ID пользователя", exclude=True)

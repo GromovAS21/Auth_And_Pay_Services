@@ -1,3 +1,5 @@
+"""Модуль аутентификации."""
+
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
@@ -21,8 +23,21 @@ security = HTTPBasic()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
-async def authenticate_user(db: Annotated[AsyncSession, Depends(get_db)], username: str, password: str):
-    """Аутентификация пользователя."""
+async def authenticate_user(db: Annotated[AsyncSession, Depends(get_db)], username: str, password: str) -> User:
+    """
+    Аутентификация пользователя.
+
+    Args:
+        db(AsyncSession): Сессия базы данных.
+        username(str): Имя пользователя.
+        password(str): Пароль пользователя.
+
+    Returns:
+        User: Объект пользователя, если аутентификация успешна, иначе вызывается исключение.
+
+    Raises:
+        HTTPException: Если аутентификация не удалась.
+    """
     user = await db.scalar(select(User).where(User.username == username))
     if not user or not bcrypt_context.verify(password, user.password) or not user.is_active:
         raise HTTPException(
@@ -38,8 +53,19 @@ async def create_access_token(
     username: str,
     is_admin: bool,
     expires_delta: timedelta,
-):
-    """Создание токена."""
+) -> bytes:
+    """
+    Создание токена.
+
+    Args:
+        user_id(int): Идентификатор пользователя.
+        username(str): Имя пользователя.
+        is_admin(bool): Флаг администратора.
+        expires_delta(timedelta): Срок действия токена.
+
+    Returns:
+        bytes: Токен.
+    """
     payload = {
         "username": username,
         "id": user_id,
@@ -50,8 +76,19 @@ async def create_access_token(
     return jwt.encode(payload, config.SECRET_KEY, algorithm=config.ALGORITHM)
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
-    """Предоставления пользователя"""
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> dict:
+    """
+    Предоставления пользователя.
+
+    Args:
+        token(str): Токен пользователя.
+
+    Returns:
+        dict: Объект пользователя, если токен действителен, иначе вызывается исключение.
+
+    Raises:
+        HTTPException: Если токен не действителен.
+    """
     try:
         payload = jwt.decode(token, config.SECRET_KEY, algorithms=[config.ALGORITHM])
         username: str | None = payload.get("username")
@@ -94,8 +131,17 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 async def login(
     db: Annotated[AsyncSession, Depends(get_db)],
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-):
-    """Авторизация пользователя."""
+) -> dict:
+    """
+    Авторизация пользователя.
+
+    Args:
+        db(AsyncSession): Сессия базы данных.
+        form_data(OAuth2PasswordRequestForm): Форма авторизации пользователя.
+
+    Returns:
+        dict: Токен пользователя.
+    """
     user = await authenticate_user(db, form_data.username, form_data.password)
     token = await create_access_token(
         user.id,

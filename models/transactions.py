@@ -1,3 +1,5 @@
+"""Модуль с описанием таблицы транзакций в БД."""
+
 from sqlalchemy import Float, ForeignKey, Integer, String
 from sqlalchemy.orm import mapped_column, relationship
 
@@ -5,7 +7,7 @@ from database.db import Base
 
 
 class Transaction(Base):
-    """Таблица платежей"""
+    """Таблица платежей."""
 
     __tablename__ = "transactions"
 

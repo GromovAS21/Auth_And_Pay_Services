@@ -1,3 +1,5 @@
+"""Модуль для работы с транзакциями."""
+
 from typing import Annotated
 
 import sqlalchemy
@@ -12,7 +14,7 @@ from models.accounts import Account
 from models.transactions import Transaction
 from models.users import User
 from routers.auth import get_current_user
-from routers.services.webhook import verify_signature
+from routers.services.validators import verify_signature
 from schemas import WebhookRequestSchema
 
 
@@ -24,8 +26,20 @@ async def payment(
     db: Annotated[AsyncSession, Depends(get_db)],
     payment_data: WebhookRequestSchema,
     get_user: Annotated[dict, Depends(get_current_user)],
-):
-    """ "Запрос на создание платежа"""
+) -> dict:
+    """
+    Запрос на создание платежа.
+
+    Args:
+        db(AsyncSession): Сессия базы данных.
+        payment_data(WebhookRequestSchema): Данные платежа.
+        get_user(dict): Текущий пользователь.
+
+    Returns:
+        dict: Статус запроса и сообщение об успешном платеже.
+    Raises:
+        HTTPException: Если подпись неверна или пользователь и аккаунт не текущего пользователя
+    """
     if not await verify_signature(payment_data):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid signature")
     user = await db.scalar(select(User).where(User.id == payment_data.user_id))

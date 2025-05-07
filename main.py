@@ -1,3 +1,5 @@
+"""Модуль выполняет инициализацию FastAPI"""
+
 from fastapi import FastAPI
 
 from routers import auth, transactions, users

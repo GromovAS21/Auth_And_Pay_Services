@@ -1,3 +1,5 @@
+"""Модуль с схемами для работы приложения."""
+
 from typing import List
 
 from pydantic import BaseModel, EmailStr, Field

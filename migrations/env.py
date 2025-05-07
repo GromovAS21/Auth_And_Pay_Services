@@ -1,3 +1,5 @@
+"""Модуль для работы с базой данных."""
+
 import asyncio
 from logging.config import fileConfig
 

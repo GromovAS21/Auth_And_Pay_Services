@@ -1,3 +1,5 @@
+"""Модуль с переменными окружения."""
+
 import os
 
 from dotenv import load_dotenv

@@ -16,9 +16,6 @@ from models.users import User
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-SECRET_KEY = config.SECRET_KEY
-ALGORITHM = config.ALGORITHM
-
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBasic()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
@@ -58,13 +55,13 @@ async def create_access_token(
         "exp": datetime.now(timezone.utc) + expires_delta,
     }
     payload["exp"] = int(payload["exp"].timestamp())
-    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(payload, config.SECRET_KEY, algorithm=config.ALGORITHM)
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     """Предоставления пользователя"""
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, config.SECRET_KEY, algorithms=[config.ALGORITHM])
         username: str | None = payload.get("username")
         user_id: int | None = payload.get("id")
         is_admin: bool | None = payload.get("is_admin")

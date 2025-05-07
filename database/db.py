@@ -11,4 +11,6 @@ Session = async_sessionmaker(bind=engine, expire_on_commit=False, class_=AsyncSe
 
 
 class Base(DeclarativeBase):
+    """Базовый класс для таблицы."""
+
     pass

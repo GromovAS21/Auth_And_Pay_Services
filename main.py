@@ -1,4 +1,4 @@
-"""Модуль выполняет инициализацию FastAPI"""
+"""Модуль выполняет инициализацию FastAPI."""
 
 from fastapi import FastAPI
 

@@ -1,0 +1,4 @@
+[flake8]
+max-line-length = 119
+exclude = .git,__pycache__,poetry.lock,pyproject.toml,migrations, __init__.py,
+ignore =  D100, E731, W503

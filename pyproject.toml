@@ -12,8 +12,34 @@ dotenv = "^0.9.9"
 fastapi = "^0.115.12"
 pydantic = "^2.11.4"
 uvicorn = "^0.34.2"
+passlib = "^1.7.4"
+asyncpg = "^0.30.0"
+python-multipart = "^0.0.20"
+alembic = "^1.15.2"
+greenlet = "^3.2.1"
+pyjwt = "^2.10.1"
+email-validator = "^2.2.0"
+bcrypt = "4.0.1"
 
+[tool.poetry.group.dev.dependencies]
+black = "^25.1.0"
+isort = "^6.0.1"
+flake8 = "^7.2.0"
+pre-commit = "^4.2.0"
+flake8-docstrings = "^1.7.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 119
+extend-exclude = "migrations/"
+
+[tool.isort]
+profile = "black"
+include_trailing_comma = true
+line_length = 119
+lines_after_imports = 2
+multi_line_output = 3
+skip = ["__init__.py", "/migrations"]
